@@ -41,9 +41,9 @@ function Level(plan) {
       else if (ch == "!")
         fieldType = "lava";
     else if (ch == "#")
-    	fieldType = "knife";
+      fieldType = "knife";
     else if (ch == "g")
-    	fieldType = "ghost";
+      fieldType = "ghost";
 
       // "Push" the fieldType, which is a string, onto the gridLine array (at the end).
       gridLine.push(fieldType);
@@ -107,6 +107,7 @@ Ghost.prototype.type = "ghost";
 function Knife(pos) {
   this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
   this.size = new Vector(1, 1);
+  this.wobble = Math.random() * Math.PI * 2;
 }
 Knife.prototype.type = "knife";
 
@@ -305,14 +306,19 @@ Lava.prototype.act = function(step, level) {
 };
 
 Knife.prototype.act = function(step, level) {
+  var maxStep = 0.1;
+  var wobbleSpeed = 10, wobbleDist = 0.1;
+  this.wobble += step * wobbleSpeed;
+  var wobblePos = Math.sin(this.wobble) * wobbleDist;
+  this.pos = this.basePos.plus(new Vector(0, wobblePos));
  };
 
 
 
 
 Coin.prototype.act = function(step) {
-	var maxStep = 0.05;
-	var wobbleSpeed = 8, wobbleDist = 0.07;
+  var maxStep = 0.05;
+  var wobbleSpeed = 8, wobbleDist = 0.07;
   this.wobble += step * wobbleSpeed;
   var wobblePos = Math.sin(this.wobble) * wobbleDist;
   this.pos = this.basePos.plus(new Vector(0, wobblePos));
@@ -321,8 +327,8 @@ Coin.prototype.act = function(step) {
 
 
 Ghost.prototype.act = function(step) {
-	var maxStep = 0.05;
-	var wobbleSpeed = 2, wobbleDist = 1;
+  var maxStep = 0.05;
+  var wobbleSpeed = 2, wobbleDist = 1;
   this.wobble += step * wobbleSpeed;
   var wobblePos = Math.sin(this.wobble) * wobbleDist;
   this.pos = this.basePos.plus(new Vector(0, wobblePos));
@@ -489,15 +495,15 @@ function runLevel(level, Display, andThen) {
 }
 
 function displayMessage(message){
-	var newDiv = document.createElement("div");
-	var newContent = document.createTextNode(message);
-	newDiv.appendChild(newContent);
-	var game = document.getElementsByClassName('game')[0];
-	newDiv.className = "message";
-	document.body.appendChild(newDiv);
-	var newDivLocation = document.getElementsByClassName('message')[0];
-	setTimeout(function(){
-		document.body.removeChild(newDivLocation)}, 800);
+  var newDiv = document.createElement("div");
+  var newContent = document.createTextNode(message);
+  newDiv.appendChild(newContent);
+  var game = document.getElementsByClassName('game')[0];
+  newDiv.className = "message";
+  document.body.appendChild(newDiv);
+  var newDivLocation = document.getElementsByClassName('message')[0];
+  setTimeout(function(){
+    document.body.removeChild(newDivLocation)}, 800);
 
 }
 function runGame(plans, Display) {
@@ -510,8 +516,57 @@ function runGame(plans, Display) {
       else if (n < plans.length - 1)
         startLevel(n + 1);
       else
-      	displayMessage("SUCCESS!");
+        displayMessage("SUCCESS!");
     });
   }
   startLevel(0);
 }
+
+
+function initCanvas(cb){
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+  canvas.style.width = "600px";
+  canvas.style.height = "480px";
+
+  ctx.fillStyle = "#34A6FB";
+  ctx.fillRect(0, 0, 600, 450);
+
+
+  ctx.font = "45px Impact";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "black";
+  ctx.fillText("Super Pineapple Adventure!", 300, 125, 600);
+
+  ctx.font = "30px Impact";
+  ctx.fillText("Click to Start", 300, 375);
+ 
+  var img = new Image();
+  img.src = "css/pineapple.png";
+  img.onload = function() {
+  ctx.drawImage(img, 260, 200, 80, 100);  
+  }
+
+
+
+
+
+
+
+  canvas.addEventListener("click", function(){
+    document.body.removeChild(canvas);
+     runGame(GAME_LEVELS, DOMDisplay)
+  }, false);
+  
+
+
+
+}
+
+
+
+
+
+
+
+
